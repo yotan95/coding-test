@@ -1,74 +1,89 @@
 import java.util.*;
+import java.io.*;
 
 class Solution {
-    static int[][] move = {{1,0}, {-1,0}, {0,1}, {0,-1}};
-    static boolean[][] visit;
-    static int n, m, count, answer;
+    static int n, m, count;
     static char[][] graph;
-
-
+    
     public int solution(String[] storage, String[] requests) {
         n = storage.length;
         m = storage[0].length();
         graph = new char[n][m];
-        answer = n*m;
         count = 0;
-
-        for(int i = 0 ; i < n; i++){
-            graph[i] = storage[i].toCharArray();
-        }
-
-        for(String request : requests){
-
-            if(request.length() == 1){
-                lift(request.charAt(0));
-            }
-            if(request.length() == 2){
-                crane(request.charAt(0));
+        for (int i = 0; i < n; i++) graph[i] = storage[i].toCharArray();
+        
+        for (String req : requests) {
+            if (req.length() == 1) {
+                lift(req.charAt(0));
+            } else {
+                crane(req.charAt(0));
             }
         }
-
-
-        return answer;
+        return count; // 문제에 따라 반환값이 총 제거 개수인지 남은 칸인지 다름. 원래 사용하던 방식에 맞춰 바꾸세요.
+        // (원래 코드는 answer = n*m; answer -= count; return answer; 였음)
     }
-
-    static void crane(char target){
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < m; j++) {
-                if(graph[i][j] == target) {
-                    answer--;
-                    graph[i][j] = 0;
+    
+    // 크레인: 해당 문자 전부 제거
+    static void crane(char target) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (graph[i][j] == target) {
+                    graph[i][j] = ' ';
+                    count++;
                 }
             }
         }
     }
-
-    static void lift(char target){
-        visit = new boolean[n][m];
-        for(int i = 0; i < n; i++) {
-            if(!visit[i][0]) dfs(i, 0, target);
-            if(!visit[i][m-1]) dfs(i, m-1, target);
-        }
-        for(int i = 0; i < m; i++) {
-            if(!visit[0][i]) dfs(0, i, target);
-            if(!visit[n-1][i]) dfs(n-1, i, target);
-        }
-    }
-
-    static void dfs(int x, int y, char target){
-        visit[x][y] = true;
-        if(graph[x][y] == 0) {
-            for(int i = 0; i < move.length; i++) {
-                int lx = x + move[i][0];
-                int ly = y + move[i][1];
-                if(lx < 0 || ly < 0 || lx >= n || ly >= m) continue;
-                if(!visit[lx][ly]) dfs(lx, ly, target);
+    
+    // 리프트: 네 방향(위, 아래, 왼쪽, 오른쪽)에서 각각 "처음 만나는" 칸을 확인하여 target이면 제거
+    static void lift(char target) {
+        // 위 -> 아래 (각 열)
+        for (int j = 0; j < m; j++) {
+            for (int i = 0; i < n; i++) {
+                if (graph[i][j] != ' ') {
+                    if (graph[i][j] == target) {
+                        graph[i][j] = ' ';
+                        count++;
+                    }
+                    break;
+                }
             }
         }
-        if(graph[x][y] == target) {
-            answer--;
-            graph[x][y] = 0;
+        // 아래 -> 위 (각 열)
+        for (int j = 0; j < m; j++) {
+            for (int i = n - 1; i >= 0; i--) {
+                if (graph[i][j] != ' ') {
+                    if (graph[i][j] == target) {
+                        graph[i][j] = ' ';
+                        count++;
+                    }
+                    break;
+                }
+            }
         }
-
+        // 왼쪽 -> 오른쪽 (각 행)
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (graph[i][j] != ' ') {
+                    if (graph[i][j] == target) {
+                        graph[i][j] = ' ';
+                        count++;
+                    }
+                    break;
+                }
+            }
+        }
+        // 오른쪽 -> 왼쪽 (각 행)
+        for (int i = 0; i < n; i++) {
+            for (int j = m - 1; j >= 0; j--) {
+                if (graph[i][j] != ' ') {
+                    if (graph[i][j] == target) {
+                        graph[i][j] = ' ';
+                        count++;
+                    }
+                    break;
+                }
+            }
+        }
     }
 }
